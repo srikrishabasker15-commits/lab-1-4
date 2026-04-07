@@ -1,0 +1,63 @@
+#include <stdio.h>
+#include <string.h>
+
+char stack[20], input[20];
+int top = -1;
+int i = 0;
+
+void shift() {
+    stack[++top] = input[i++];
+    stack[top + 1] = '\0';
+    printf("Shift: %s\n", stack);
+}
+
+void reduce() {
+    // Rule: E -> id
+    if (stack[top] == 'd' && stack[top - 1] == 'i') {
+        stack[top - 1] = 'E';
+        top--;
+        printf("Reduce: E->id => %s\n", stack);
+    }
+    // Rule: E -> E+E
+    else if (stack[top] == 'E' && stack[top - 1] == '+' && stack[top - 2] == 'E') {
+        stack[top - 2] = 'E';
+        top -= 2;
+        printf("Reduce: E->E+E => %s\n", stack);
+    }
+    // Rule: E -> E*E
+    else if (stack[top] == 'E' && stack[top - 1] == '*' && stack[top - 2] == 'E') {
+        stack[top - 2] = 'E';
+        top -= 2;
+        printf("Reduce: E->E*E => %s\n", stack);
+    }
+    // Rule: E -> (E)
+    else if (stack[top] == ')' && stack[top - 1] == 'E' && stack[top - 2] == '(') {
+        stack[top - 2] = 'E';
+        top -= 2;
+        printf("Reduce: E->(E) => %s\n", stack);
+    }
+}
+
+int main() {
+    printf("Enter input string (use 'id' for identifiers): ");
+    scanf("%s", input);
+
+    printf("\nStack Operations:\n");
+
+    while (i < strlen(input)) {
+        shift();
+        reduce();
+    }
+
+    // Final reductions
+    while (top > 0) {
+        reduce();
+        if (top == 0 && stack[top] == 'E') {
+            printf("Accepted!\n");
+            return 0;
+        }
+    }
+
+    printf("Rejected!\n");
+    return 0;
+}
